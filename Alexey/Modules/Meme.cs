@@ -85,7 +85,7 @@ namespace Alexey.Modules
 
         public long? ProcessMessage(Message message)
         {
-            if (message.Text == null)
+            if (string.IsNullOrEmpty(message.Text))
             {
                 return 0;
             }

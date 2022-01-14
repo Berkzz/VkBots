@@ -4,6 +4,7 @@ using Core.Modules;
 using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.SafetyEnums;
+using VkNet.Exception;
 using VkNet.Model.RequestParams;
 
 namespace Alexey.Modules
@@ -42,12 +43,14 @@ namespace Alexey.Modules
         {
             var groupId = ulong.Parse(_config.GetSection("groupId").Value);
             var s = _api.Groups.GetLongPollServer(groupId);
-            var prms = new BotsLongPollHistoryParams { Key = s.Key, Server = s.Server, Ts = s.Ts, Wait = 25 };
+            var prms = new BotsLongPollHistoryParams { Key = s.Key, Server = s.Server, Ts = s.Ts, Wait = 100 };
             while (true)
             {
                 try
                 {
                     prms.Key = s.Key;
+                    prms.Ts = s.Ts;
+                    prms.Server = s.Server;
                     var poll = _api.Groups.GetBotsLongPollHistory(prms);
                     foreach (var update in poll.Updates.Where(x => x.Type == GroupUpdateType.MessageNew)) // обработка всех новых сообщений
                     {
@@ -60,6 +63,11 @@ namespace Alexey.Modules
                                 try
                                 {
                                     UpdateId(message.PeerId, module.ProcessMessage(message));
+                                }
+                                catch (LongPollKeyExpiredException)
+                                {
+                                    Console.WriteLine("Key expired, updating server");
+                                    s = _api.Groups.GetLongPollServer(groupId);
                                 }
                                 catch (Exception ex)
                                 {
