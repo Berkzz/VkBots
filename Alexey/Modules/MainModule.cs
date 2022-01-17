@@ -48,6 +48,7 @@ namespace Alexey.Modules
             {
                 try
                 {
+                    s = _api.Groups.GetLongPollServer(groupId);
                     prms.Key = s.Key;
                     prms.Ts = s.Ts;
                     prms.Server = s.Server;

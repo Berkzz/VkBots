@@ -29,16 +29,11 @@ namespace Personal
         public void LongPoll()
         {
             var s = _api.Messages.GetLongPollServer(needPts: true);
-            var ts = ulong.Parse(s.Ts);
-            var prms = new MessagesGetLongPollHistoryParams { MaxMsgId = _lastMsgId, Pts = s.Pts, Ts = ts, MsgsLimit = 200 };
             while (true)
             {
                 try
                 {
-                    prms.MaxMsgId = _lastMsgId;
-                    prms.Ts = ulong.Parse(s.Ts);
-                    prms.Pts = s.Pts;
-                    var poll = _api.Messages.GetLongPollHistory(prms);
+                    var poll = _api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams { MaxMsgId = _lastMsgId, Pts = s.Pts, Ts = ulong.Parse(s.Ts), MsgsLimit = 200 });
                     foreach (var message in poll.Messages.Where(x => x != null && x.Id > _lastMsgId)) // обработка всех новых сообщений
                     {
                         Console.WriteLine(message.Id);
@@ -51,6 +46,7 @@ namespace Personal
                             catch (Exception ex)
                             {
                                 Console.WriteLine(ex);
+                                s = _api.Messages.GetLongPollServer(needPts: true);
                             }
                         }
                         UpdateId(message.Id);
