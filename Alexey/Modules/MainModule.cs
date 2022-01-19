@@ -43,7 +43,7 @@ namespace Alexey.Modules
         {
             var groupId = ulong.Parse(_config.GetSection("groupId").Value);
             var s = _api.Groups.GetLongPollServer(groupId);
-            var prms = new BotsLongPollHistoryParams { Key = s.Key, Server = s.Server, Ts = s.Ts, Wait = 100 };
+            var prms = new BotsLongPollHistoryParams { Key = s.Key, Server = s.Server, Ts = s.Ts, Wait = 50 };
             while (true)
             {
                 try
@@ -67,11 +67,13 @@ namespace Alexey.Modules
                                 }
                                 catch (LongPollKeyExpiredException)
                                 {
+                                    Console.WriteLine();
                                     Console.WriteLine("Key expired, updating server");
                                     s = _api.Groups.GetLongPollServer(groupId);
                                 }
                                 catch (Exception ex)
                                 {
+                                    Console.WriteLine();
                                     Console.WriteLine(ex);
                                 }
                             }
@@ -81,6 +83,7 @@ namespace Alexey.Modules
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine();
                     Console.WriteLine(ex);
                 }
             }

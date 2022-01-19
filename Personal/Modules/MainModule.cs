@@ -33,7 +33,7 @@ namespace Personal
             {
                 try
                 {
-                    var poll = _api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams { MaxMsgId = _lastMsgId, Pts = s.Pts, Ts = ulong.Parse(s.Ts), MsgsLimit = 200 });
+                    var poll = _api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams { MaxMsgId = _lastMsgId, Pts = s.Pts, Ts = ulong.Parse(s.Ts) });
                     foreach (var message in poll.Messages.Where(x => x != null && x.Id > _lastMsgId)) // обработка всех новых сообщений
                     {
                         Console.WriteLine(message.Id);
@@ -45,18 +45,25 @@ namespace Personal
                             }
                             catch (Exception ex)
                             {
+                                Console.WriteLine();
                                 Console.WriteLine(ex);
                                 s = _api.Messages.GetLongPollServer(needPts: true);
                             }
                         }
                         UpdateId(message.Id);
+                        if (poll.Messages.Count() > 10)
+                        {
+                            s = _api.Messages.GetLongPollServer(needPts: true);
+                            Console.WriteLine("Updating server");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine();
                     Console.WriteLine(ex);
                 }
-                Thread.Sleep(500);
+                Thread.Sleep(200);
             }
         }
     }
